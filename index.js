@@ -68,7 +68,7 @@ app.post("/auth/signup", checkBodyParams, (req, res) => {
               html: `
     <p> Hey ${user.name}, Welcome in Todo App. Your Accoun has been created. In order to use youe Account you have to Verify your email by clicking on following link.</p>
     
-    <a href="http://localhost:3001/auth/activate-account/${token}"> Activate Account </a>
+    <a href="https://todo-application-bdvl.onrender.com/${token}"> Activate Account </a>
     `,
             };
             // sending Mail
