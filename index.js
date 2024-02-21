@@ -50,7 +50,7 @@ app.post("/auth/signup", checkBodyParams, (req, res) => {
             // if account is created successfully then sent an account activation email
 
             // generate token
-            const token = jwt.sign({ _id: user._id }, "ABCD");
+            const Token = jwt.sign({ _id: user._id }, "ABCD");
 
             //send this token on email
             var transporter = nodemailer.createTransport({
@@ -66,9 +66,9 @@ app.post("/auth/signup", checkBodyParams, (req, res) => {
               to: user.email,
               subject: " Activate Your Todo Account",
               html: `
-    <p> Hey ${user.name}, Welcome in Todo App. Your Accoun has been created. In order to use youe Account you have to Verify your email by clicking on following link.</p>
+    <p> Hey ${user.name}, Welcome in Todo App. Your Account has been created. In order to use your Account you have to Verify your email by clicking on following link.</p>
     
-    <a href="https://todo-application-bdvl.onrender.com/${token}"> Activate Account </a>
+    <a href="${process.env.Backend_URL}/auth/activate-account/${Token}"> Activate Account </a>
     `,
             };
             // sending Mail
@@ -91,22 +91,32 @@ app.post("/auth/signup", checkBodyParams, (req, res) => {
 });
 
 // Route that will handle the account activation link sent to Email
-
-app.get("/auth/activate-account/:token", (req, res) => {
-  const Token = req.params.token;
+app.get("/auth/activate-account/:Token", (req, res) => {
+  const Token = req.params.Token;
 
   // try to verify token
   try {
     const data = jwt.verify(Token, "ABCD");
+
     // Try to find user now
     User.findByIdAndUpdate(data._id, { emailVerified: true })
-      .then(() => {
-        res.json({ success: true, message: " Now You Can Login" });
+      .then((user) => {
+        if (!user) {
+          return res.json({
+            success: false,
+            message: "User not found",
+          });
+        }
+
+        res.json({
+          success: true,
+          message: "Account activated. You can now log in.",
+        });
       })
-      .catch(() => {
+      .catch((err) => {
         res.json({
           success: false,
-          message: "Please Try Again! We are sorry for inconvinece!",
+          message: "Please Try Again! We are sorry for the inconvenience!",
         });
       });
   } catch (err) {
